@@ -1,0 +1,8 @@
+.users-list {
+    display: flex;
+}
+.users-list_item {
+}
+.users-list_value {
+    list-style-type: none;
+}

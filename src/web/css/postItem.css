@@ -1,0 +1,22 @@
+.post {
+    list-style-type: none;
+}
+
+.dividing-line {
+   background: grey;
+    height: 3px;
+    size: 2px;
+}
+.post-item {
+    display: flex;
+}
+.dividing-line_header {
+    border-bottom: 1px solid grey;
+    width: 10%;
+}
+.post-item_name {
+    text-decoration: none;
+    link: black;
+    font-size: 20px;
+    font-weight: bold;
+}

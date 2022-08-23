@@ -1,0 +1,13 @@
+li {
+    list-style-type: none;
+}
+
+.comments {
+    border: solid 1px #4e555b;
+}
+.comments__title {
+    font-weight: bold;
+}
+.comments__list {
+    display: flex;
+}

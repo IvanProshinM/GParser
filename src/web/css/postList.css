@@ -1,0 +1,11 @@
+.post-list {
+    display: flex;
+
+}
+.post-list_content {
+
+}
+.post-list_side-bar {
+    width: 50%;
+
+}
