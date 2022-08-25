@@ -12,7 +12,7 @@
         "irc": "irc://irc.freenode.net/yii",
         "source": "https://github.com/yiisoft/yii2"
     },
-    "minimum-stability": "stable",
+    "minimum-stability": "dev",
     "require": {
         "php": ">=7.4.0",
         "yiisoft/yii2": "~2.0.14",
@@ -20,7 +20,14 @@
         "yiisoft/yii2-swiftmailer": "~2.0.0 || ~2.1.0",
         "vova07/yii2-imperavi-widget": "*",
         "kartik-v/yii2-widget-datepicker": "@dev",
-        "yiisoft/yii2-bootstrap": "^2.0"
+        "yiisoft/yii2-bootstrap": "^2.0",
+        "curl/curl": "^2.3",
+        "ext-curl": "*",
+        "simplehtmldom/simplehtmldom": "dev-master",
+        "phpquery/phpquery": "dev-master",
+        "paquettg/php-html-parser": "dev-master"
+
+
     },
     "require-dev": {
         "yiisoft/yii2-debug": "~2.1.0",
