@@ -22,4 +22,24 @@ class InitController extends \yii\console\Controller {
         }
     }
 
+    public function actionCities() {
+
+        $filepath = \Yii::getAlias("@app/countries+cities.json");
+        $str = file_get_contents($filepath);
+        $json = json_decode($str, true);
+        $i = 0;
+        if ($json[$i]["name"] === "Afghanistan") {
+            $cities = $json[$i]["cities"];
+
+            foreach ($cities as $city) {
+                echo $city["name"] . "<br/>";
+            }
+        }
+    }
+
+
+
+
+
+
 }

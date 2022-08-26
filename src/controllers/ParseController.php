@@ -3,42 +3,65 @@
 namespace app\controllers;
 
 
+use app\services\JsonParseService;
 use PHPHtmlParser\Dom;
 use app\models\Country;
+use yii\helpers\VarDumper;
+use Yii;
 
 class ParseController extends \yii\web\Controller
-
-
-    /*Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/104.0.0.0 Safari/537.36*/
-
-
 {
-    public function actionParse($url, $referer = 'https://google.com/')
-    {
 
+
+    /**
+     * @var JsonParseService
+     */
+
+    private $jsonParseService;
+
+    public function __construct($id,
+        $module,
+                                JsonParseService $jsonParseService,
+        $config = [])
+    {
+        parent::__construct($id, $module, $config);
+        $this->jsonParseService = $jsonParseService;
+    }
+
+
+    public function actionParse()
+    {
+        $filepath = \Yii::getAlias("@app/example.json");
+        $str = file_get_contents($filepath);
+        $json = json_decode($str, true);
+        VarDumper::dump($json, 2, true);
+        echo $json[0]["cities"][0]["name"];
     }
 
     public function actionGetPage()
     {
-        $dom = new Dom();
-        $countries = [];
-        $i = 0;
-        $dom->loadFromUrl('https://www.un.org/ru/about-us/member-states');
-        foreach ($dom->find('h2') as $value) {
-            $model = new Country();
-            $countries[$i] = str_replace("*", "", strip_tags($value));;
-            $model->name = $countries[$i];
-            $model->save();
-            $i++;
+        $model = new \FindCityModel();
+        if ($model->load(Yii::$app->request->post()) && $model->validate()) {
         }
+
+        $filepath = \Yii::getAlias("@app/example.json");
+        $str = file_get_contents($filepath);
+        $json = json_decode($str, true);
+        $i = 0;
+        $j = 0;
+        if ($json[$i]["name"] === "Afghanistan") {
+            $cities = $json[$i]["cities"];
+
+            foreach ($cities as $city) {
+                echo $city["name"] . "<br/>";
+            }
+        }
+        return $this->render('findCity', ['model' => $model]);
     }
 
 
     public function actionJsonPage()
     {
-
-
-
+        $countries = $this->jsonParseService->getCities( 0);
     }
-
 }
