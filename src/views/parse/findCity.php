@@ -8,10 +8,10 @@ use yii\helpers\Html;
 /**
  * @var $form yii\widgets\ActiveForm
  * @var $this yii\web\View
- * @var $model app\models\loginModel
+ * @var $model app\models\FindCityModel
  */
 
-$this->title = 'Ищем городаю.';
+$this->title = 'Ищем города.';
 
 ?>
 
@@ -19,9 +19,8 @@ $this->title = 'Ищем городаю.';
 
 
 <?php $form = ActiveForm::begin(); ?>
-<p>Введите страну</p>
-<?= $form->field($model, 'Страна') ?>
-
+<?= $form->field($model, 'country') ?>
+<?= $form->field($model, 'city') ?>
 
 <div class="form-group">
     <br>

@@ -7,6 +7,7 @@ use app\services\JsonParseService;
 use PHPHtmlParser\Dom;
 use app\models\Country;
 use yii\helpers\VarDumper;
+use app\models\FindCityModel;
 use Yii;
 
 class ParseController extends \yii\web\Controller
@@ -40,28 +41,18 @@ class ParseController extends \yii\web\Controller
 
     public function actionGetPage()
     {
-        $model = new \FindCityModel();
-        if ($model->load(Yii::$app->request->post()) && $model->validate()) {
-        }
 
-        $filepath = \Yii::getAlias("@app/example.json");
-        $str = file_get_contents($filepath);
-        $json = json_decode($str, true);
-        $i = 0;
-        $j = 0;
-        if ($json[$i]["name"] === "Afghanistan") {
-            $cities = $json[$i]["cities"];
-
-            foreach ($cities as $city) {
-                echo $city["name"] . "<br/>";
-            }
-        }
-        return $this->render('findCity', ['model' => $model]);
     }
 
 
     public function actionJsonPage()
     {
-        $countries = $this->jsonParseService->getCities( 0);
+        $model = new FindCityModel();
+        if ($model->load(Yii::$app->request->post()) && $model->validate()) {
+
+            $countries = $this->jsonParseService->getCity($model->country, $model->city);
+
+        }
+        return $this->render('findCity', ['model' => $model]);
     }
 }

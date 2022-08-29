@@ -1,15 +1,17 @@
 <?php
 
+namespace app\models;
 
 class FindCityModel extends \yii\base\Model
 {
-    public string $country;
+    public $country;
+    public $city;
 
     public function rules()
     {
         return [
-            [["country"], "required"],
-            [["country"], "string"],
+            [["country", "city"], "required"],
+            [["country", "city"], "string"],
         ];
     }
 
