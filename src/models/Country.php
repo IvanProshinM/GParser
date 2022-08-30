@@ -25,4 +25,13 @@ class Country extends \yii\db\ActiveRecord
 
     }
 
+    /**
+     * @return \yii\db\ActiveQuery
+     */
+
+    public function getCities()
+    {
+        return $this->hasMany(Cities::class, ['country_id'=>'id']);
+    }
+
 }

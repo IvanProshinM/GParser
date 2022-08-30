@@ -3,6 +3,8 @@
 namespace app\controllers;
 
 
+use app\models\Cities;
+use app\models\Citites;
 use app\services\JsonParseService;
 use PHPHtmlParser\Dom;
 use app\models\Country;
@@ -47,12 +49,21 @@ class ParseController extends \yii\web\Controller
 
     public function actionJsonPage()
     {
+
         $model = new FindCityModel();
         if ($model->load(Yii::$app->request->post()) && $model->validate()) {
+            $country = Country::find()
+                ->where(['name' => $model->country])
+                ->one();
+            if (!$country) {
+                echo 'страны с таким названем не найдено';
+            }
+            $city = $country->getCities()->andWhere(['country_id'=>$country->id]);
 
-            $countries = $this->jsonParseService->getCity($model->country, $model->city);
 
         }
-        return $this->render('findCity', ['model' => $model]);
+
+        return $this->render('findCity',['model'=>$model, 'city'=>$city], );
     }
+
 }

@@ -26,7 +26,8 @@
         "simplehtmldom/simplehtmldom": "dev-master",
         "phpquery/phpquery": "dev-master",
         "paquettg/php-html-parser": "dev-master",
-        "halaxa/json-machine": "dev-master"
+        "halaxa/json-machine": "dev-master",
+        "kartik-v/yii2-widget-typeahead": "dev-master"
 
 
     },
