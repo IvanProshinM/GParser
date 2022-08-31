@@ -27,9 +27,8 @@
         "phpquery/phpquery": "dev-master",
         "paquettg/php-html-parser": "dev-master",
         "halaxa/json-machine": "dev-master",
-        "kartik-v/yii2-widget-typeahead": "dev-master"
-
-
+        "kartik-v/yii2-widget-typeahead": "dev-master",
+      "ext-json": "*"
     },
     "require-dev": {
         "yiisoft/yii2-debug": "~2.1.0",
