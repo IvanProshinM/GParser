@@ -60,8 +60,13 @@ class ParserController extends \yii\web\Controller
             if (!$country) {
                 echo 'страны с таким названем не найдено';
             }
-            $city = $country->getCities()->andWhere(['country_id' => $country->id])->all();
-            return $this->redirect('parser/json-page');
+
+            $city = $country->getCities()
+                ->andWhere(['country_id' => $country->id])
+                ->andWhere(['cityName'=>$model->city])
+                ->all();
+            echo $country . $city;
+
         }
         return $this->render('findCity', ['model' => $model]);
     }
@@ -86,8 +91,8 @@ class ParserController extends \yii\web\Controller
         $getParams = Yii::$app->request->get();
         $cityData = [];
         $city = Cities::find()
-            ->where(['like', 'name', '%' . $getParams['country'] . '%', false])
-            /*->andWhere([$getParams['id'] => ])*/
+            ->where(['like', 'name', '%' . $getParams['city'] . '%', false])
+            ->andWhere(['country_id'=>$getParams['country_id']])
             ->all();
         foreach ($city as $cityList) {
             $cityData[] = ['value' => $cityList['name']];
