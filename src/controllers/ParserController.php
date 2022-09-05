@@ -4,17 +4,17 @@ namespace app\controllers;
 
 
 use app\models\Cities;
-use app\models\Citites;
 use app\services\JsonParseService;
-use PHPHtmlParser\Dom;
 use app\models\Country;
-use PHPUnit\Util\Json;
-use yii\helpers\VarDumper;
 use app\models\FindCityModel;
+use PHPHtmlParser\Dom;
 use Yii;
+use yii\helpers\Url;
 
 class ParserController extends \yii\web\Controller
 {
+
+
 
 
     /**
@@ -33,40 +33,15 @@ class ParserController extends \yii\web\Controller
     }
 
 
-    public function actionParse()
-    {
-        $filepath = \Yii::getAlias("@app/example.json");
-        $str = file_get_contents($filepath);
-        $json = json_decode($str, true);
-        VarDumper::dump($json, 2, true);
-        echo $json[0]["cities"][0]["name"];
-    }
-
-    public function actionGetPage()
-    {
-
-    }
-
-
     public function actionJsonPage()
     {
 
         $model = new FindCityModel();
         $cityData = [];
         if ($model->load(Yii::$app->request->post()) && $model->validate()) {
-            $country = Country::find()
-                ->where(['name' => $model->country])
-                ->one();
-            if (!$country) {
-                echo 'страны с таким названем не найдено';
-            }
 
-            $city = $country->getCities()
-                ->andWhere(['country_id' => $country->id])
-                ->andWhere(['cityName'=>$model->city])
-                ->all();
-            echo $country . $city;
-
+            $queryStr = "https://maps.googleapis.com/maps/api/place/findplacefromtext/json?fields=formatted_address%2Copening_hours&input=' . $model->country . '&input=' . $model->city . '&inputtype=textquery&key=AIzaSyDgKrL7ZGekAAuAgW6-hi936Nxa_6LAVPM";
+            $this->redirect($queryStr);
         }
         return $this->render('findCity', ['model' => $model]);
     }
@@ -91,13 +66,31 @@ class ParserController extends \yii\web\Controller
         $getParams = Yii::$app->request->get();
         $cityData = [];
         $city = Cities::find()
-            ->where(['like', 'name', '%' . $getParams['city'] . '%', false])
-            ->andWhere(['country_id'=>$getParams['country_id']])
+            ->where(['like', 'cityName', '%' . $getParams['city'] . '%', false])
+    /*        ->andWhere(['country_id' => $getParams['country_id']])*/
             ->all();
         foreach ($city as $cityList) {
-            $cityData[] = ['value' => $cityList['name']];
+            $cityData[] = ['value' => $cityList['cityName']];
         }
         return json_encode($cityData);
+    }
+
+
+    /**
+     * @throws \PHPHtmlParser\Exceptions\ChildNotFoundException
+     * @throws \PHPHtmlParser\Exceptions\CircularException
+     * @throws \PHPHtmlParser\Exceptions\StrictException
+     * @throws \Psr\Http\Client\ClientExceptionInterface
+     * @throws \PHPHtmlParser\Exceptions\NotLoadedException
+     * @throws \PHPHtmlParser\Exceptions\ContentLengthException
+     * @throws \PHPHtmlParser\Exceptions\LogicalException
+     */
+    public function actionUrl()
+    {
+        $dom = new Dom();
+        $dom->loadFromUrl("https://www.omnicoreagency.com/google-business-pofile-categories-list/");
+        $td = $dom->find('.elementor-widget-container > table > tbody *' );
+       var_dump($td);
     }
 
 

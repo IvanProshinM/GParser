@@ -28,7 +28,8 @@
         "paquettg/php-html-parser": "dev-master",
         "halaxa/json-machine": "dev-master",
         "kartik-v/yii2-widget-typeahead": "dev-master",
-      "ext-json": "*"
+      "ext-json": "*",
+        "guzzlehttp/guzzle": "^7.0"
     },
     "require-dev": {
         "yiisoft/yii2-debug": "~2.1.0",

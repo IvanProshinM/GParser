@@ -3,7 +3,6 @@
 namespace app\commands;
 
 use app\models\Cities;
-use app\models\Citites;
 use app\models\Country;
 use PHPHtmlParser\Dom;
 
@@ -35,6 +34,23 @@ class InitController extends \yii\console\Controller
             }
         }
     }
+
+    public function actionCategories()
+    {
+
+        $filepath = \Yii::getAlias("@app/countries+cities.json");
+        $json = \JsonMachine\Items::fromFile($filepath);
+        foreach ($json as $countryObj) {
+            foreach ($countryObj->cities as $city) {
+                $model = new Cities();
+                $model->cityName = $city->name;
+                $model->country_id = $countryObj->id;
+                $model->save();
+            }
+        }
+    }
+
+
 
 
 }

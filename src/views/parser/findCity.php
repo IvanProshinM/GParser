@@ -52,9 +52,7 @@ echo $form->field($model, 'country')->widget(Typeahead::className(), [
         "typeahead:select" => 'function() { 
         $("#findcitymodel-city").prop("disabled", false);
         $("#findcitymodel-city").css("background-color","white");
-        var findcitymodel_city_data_1 = new Bloodhound({"datumTokenizer":Bloodhound.tokenizers.obj.whitespace("value"),
-        "queryTokenizer":Bloodhound.tokenizers.whitespace,"remote":{"url":"/parser/search-city66666?city=%QUERY&country_id=%QUERY","wildcard":"%QUERY"}});
-
+        
         
         console.log("typeahead:select"); }'
     ],
@@ -76,7 +74,6 @@ echo $form->field($model, 'country')->widget(Typeahead::className(), [
 
     <?php
 
-
     echo $form->field($model, 'city')->widget(Typeahead::className(), [
         'name' => 'country',
         'options' => ['placeholder' => 'Filter as you type ...'],
@@ -88,7 +85,7 @@ echo $form->field($model, 'country')->widget(Typeahead::className(), [
                 'datumTokenizer' => "Bloodhound.tokenizers.obj.whitespace('value')",
                 'display' => 'value',
                 'remote' => [
-                    'url' => Url::to(['/parser/search-city']) . '?city=%QUERY' . '&' . 'country_id=%QUERY',
+                    'url' => Url::to(['/parser/search-city']) . '?city=%QUERY'/* . '&' . 'country_id=' . $countryId*/,
                     'wildcard' => '%QUERY'
                 ]
             ]
@@ -102,18 +99,6 @@ echo $form->field($model, 'country')->widget(Typeahead::className(), [
     <?= Html::submitButton('Найти', ['class' => 'btn btn-primary']) ?>
 </div>
 
-<?php echo Yii::$app->session->getFlash('alert'); ?>
 
-
-<?php ActiveForm::end(); ?>
-<?php $js = <<<JS
-    $('form').on('beforeSubmit', function(){
-        alert('Работает!');
-        return false;
-    });
-JS;
-
-$this->registerJs($js);
-?>
-
+<?php $form = ActiveForm::end() ?>
 
