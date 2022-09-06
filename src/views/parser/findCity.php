@@ -78,6 +78,14 @@ echo $form->field($model, 'country')->widget(Typeahead::className(), [
         'name' => 'country',
         'options' => ['placeholder' => 'Filter as you type ...'],
         'pluginOptions' => ['highlight' => true],
+        'pluginEvents' => [
+            "typeahead:select" => 'function() { 
+        $("#findcitymodel-city").prop("disabled", false);
+        $("#findcitymodel-city").css("background-color","white");
+        
+        
+        console.log("typeahead:select"); }'
+        ],
         'disabled' => true,
 
         'dataset' => [
@@ -94,6 +102,33 @@ echo $form->field($model, 'country')->widget(Typeahead::className(), [
 
     ?>
 </div>
+
+
+<div class="city_input">
+
+    <?php
+
+    echo $form->field($model, 'category')->widget(Typeahead::className(), [
+        'name' => 'country',
+        'options' => ['placeholder' => 'Filter as you type ...'],
+        'pluginOptions' => ['highlight' => true],
+        'disabled' => true,
+
+        'dataset' => [
+            [
+                'datumTokenizer' => "Bloodhound.tokenizers.obj.whitespace('value')",
+                'display' => 'value',
+                'remote' => [
+                    'url' => Url::to(['/parser/search-category']) . '?category=%QUERY'/* . '&' . 'country_id=' . $countryId*/,
+                    'wildcard' => '%QUERY'
+                ]
+            ]
+        ]
+    ]);
+
+    ?>
+</div>
+
 <div class="form-group">
     <br>
     <?= Html::submitButton('Найти', ['class' => 'btn btn-primary']) ?>

@@ -3,6 +3,7 @@
 namespace app\controllers;
 
 
+use app\models\Category;
 use app\models\Cities;
 use app\services\JsonParseService;
 use app\models\Country;
@@ -76,21 +77,17 @@ class ParserController extends \yii\web\Controller
     }
 
 
-    /**
-     * @throws \PHPHtmlParser\Exceptions\ChildNotFoundException
-     * @throws \PHPHtmlParser\Exceptions\CircularException
-     * @throws \PHPHtmlParser\Exceptions\StrictException
-     * @throws \Psr\Http\Client\ClientExceptionInterface
-     * @throws \PHPHtmlParser\Exceptions\NotLoadedException
-     * @throws \PHPHtmlParser\Exceptions\ContentLengthException
-     * @throws \PHPHtmlParser\Exceptions\LogicalException
-     */
-    public function actionUrl()
+    public function actionSearchCategory()
     {
-        $dom = new Dom();
-        $dom->loadFromUrl("https://www.omnicoreagency.com/google-business-pofile-categories-list/");
-        $td = $dom->find('.elementor-widget-container > table > tbody *' );
-       var_dump($td);
+        $getParams = Yii::$app->request->get();
+        $cityData = [];
+        $category = Category::find()
+            ->where(['like', 'name', '%' . $getParams['city'] . '%', false])
+            ->all();
+        foreach ($category as $categoryList) {
+            $categoryData[] = ['value' => $categoryList['name']];
+        }
+        return json_encode($categoryData);
     }
 
 

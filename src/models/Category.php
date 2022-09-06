@@ -6,9 +6,13 @@ use yii\db\ActiveRecord;
 
 class Category extends ActiveRecord
 {
+    /**
+     * @var mixed|null
+     */
+    private $name;
 
     /**
-     * @property string $categoryName
+     * @property string $name
      */
 
 
@@ -20,8 +24,8 @@ class Category extends ActiveRecord
     public function rules()
     {
         return [
-            [['categoryName'], 'string'],
-            [['categoryName'], 'required']
+            [['name'], 'string'],
+            [['name'], 'required']
         ];
     }
 

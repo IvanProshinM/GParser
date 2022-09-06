@@ -2,9 +2,11 @@
 
 namespace app\commands;
 
+use app\models\Category;
 use app\models\Cities;
 use app\models\Country;
 use PHPHtmlParser\Dom;
+use yii\helpers\VarDumper;
 
 class InitController extends \yii\console\Controller
 {
@@ -37,20 +39,15 @@ class InitController extends \yii\console\Controller
 
     public function actionCategories()
     {
-
-        $filepath = \Yii::getAlias("@app/countries+cities.json");
-        $json = \JsonMachine\Items::fromFile($filepath);
-        foreach ($json as $countryObj) {
-            foreach ($countryObj->cities as $city) {
-                $model = new Cities();
-                $model->cityName = $city->name;
-                $model->country_id = $countryObj->id;
-                $model->save();
-            }
+        $filepath = \Yii::getAlias("@app/categories.json");
+        $json = file_get_contents($filepath);
+        $obj = json_decode($json);
+        foreach ($obj->items as $category) {
+            $model = new Category();
+            $model->name = $category;
+            $model->save();
         }
     }
-
-
 
 
 }
