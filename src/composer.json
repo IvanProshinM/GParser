@@ -29,7 +29,9 @@
         "halaxa/json-machine": "dev-master",
         "kartik-v/yii2-widget-typeahead": "dev-master",
       "ext-json": "*",
-        "guzzlehttp/guzzle": "^7.0"
+        "guzzlehttp/guzzle": "^7.0",
+        "kartik-v/yii2-widget-select2": "dev-master",
+        "phpoffice/phpspreadsheet": "dev-master"
     },
     "require-dev": {
         "yiisoft/yii2-debug": "~2.1.0",

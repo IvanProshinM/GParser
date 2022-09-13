@@ -6,13 +6,13 @@ class FindCityModel extends \yii\base\Model
 {
     public $country;
     public $city;
-    public $category;
+    public array $categoryList = [];
 
     public function rules()
     {
         return [
-            [["country", "city", "category"], "required"],
-            [["country", "city", "category"], "string"],
+            [["country", "city", "categoryList"], "required"],
+            [["country", "city"], "string"],
         ];
     }
 

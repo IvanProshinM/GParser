@@ -21,8 +21,11 @@ class AppAsset extends AssetBundle
     public $baseUrl = '@web';
     public $css = [
         'css/site.css',
+        'bootstrap-tagsinput-main/src/bootstrap-tagsinput.css'
     ];
     public $js = [
+        'bootstrap-tagsinput-main/src/bootstrap-tagsinput.js',
+        'js/tagInput.js'
     ];
     public $depends = [
         'yii\web\YiiAsset',

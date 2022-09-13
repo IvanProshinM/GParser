@@ -13,6 +13,7 @@ class Category extends ActiveRecord
 
     /**
      * @property string $name
+     * @property integer $id
      */
 
 
@@ -25,6 +26,7 @@ class Category extends ActiveRecord
     {
         return [
             [['name'], 'string'],
+            [['id'], 'integer'],
             [['name'], 'required']
         ];
     }
