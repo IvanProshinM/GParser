@@ -5,6 +5,7 @@ namespace app\controllers;
 
 use app\models\Category;
 use app\models\Cities;
+use app\services\CreateExcelSheetService;
 use app\services\JsonParseService;
 use app\models\Country;
 use app\models\FindCityModel;
@@ -25,22 +26,29 @@ class ParserController extends \yii\web\Controller
 
     private $jsonParseService;
 
+    /**
+     * @var CreateExcelSheetService
+     */
+
+    private $createExcelSheetService;
+
     public function __construct($id,
         $module,
                                 JsonParseService $jsonParseService,
+                                CreateExcelSheetService $createExcelSheetService,
         $config = [])
     {
         parent::__construct($id, $module, $config);
         $this->jsonParseService = $jsonParseService;
+        $this->createExcelSheetService = $createExcelSheetService;
     }
 
 
     public function actionJsonPage()
     {
-
+        $resultArray = [];
         $model = new FindCityModel();
         if ($model->load(Yii::$app->request->post()) && $model->validate()) {
-            $categoryList = [];
             foreach ($model->categoryList as $category) {
                 $categories = Category::find()
                     ->where(["id" => $category])
@@ -58,37 +66,45 @@ class ParserController extends \yii\web\Controller
                 $queryJson = file_get_contents($queryUrl);
                 $queryArray = json_decode($queryJson, true);
                 foreach ($queryArray['results'] as $place) {
+
                     $detailQueryUrl = 'https://maps.googleapis.com/maps/api/place/details/json?';
-                        $detailQueryArray = [
-                            'placeid'=>$place['place_id'],
-                            'fields'=>'opening_hours',
-                            'key'=> 'AIzaSyDgKrL7ZGekAAuAgW6-hi936Nxa_6LAVPM'
-                        ];
-                     $detailQueryUrl .= http_build_query($detailQueryArray, '', '&',);
-                     $detailQueryJson = file_get_contents($detailQueryUrl);
-                     $detailQueryArray = json_decode($detailQueryJson, true);
+                    $detailQueryArray = [
+                        'placeid' => $place['place_id'],
+                        'fields' => 'opening_hours,website,rating,formatted_address,international_phone_number',
+                        'key' => 'AIzaSyDgKrL7ZGekAAuAgW6-hi936Nxa_6LAVPM'
+                    ];
+                    $detailQueryUrl .= http_build_query($detailQueryArray, '', '&',);
+                    $detailQueryJson = file_get_contents($detailQueryUrl);
+                    $detailQueryArray = json_decode($detailQueryJson, true);
+                    $resultArray = [
+                        'name' => $place['name'],
+                        'category' => $categorySearch,
+                        'country' => $model->country,
+                        'city' => $model->city,
+                        'address' => $place['formatted_address'],
+                        'locationLat' => $place['geometry']['location']['lat'],
+                        'locationLng' => $place['geometry']['location']['lng'],
+                        'website' => $detailQueryArray['result']['website'],
+                        'rating' => $place['rating'],
+                        'Monday' => str_replace('Monday:', '', $detailQueryArray['result']['opening_hours']['weekday_text'][0]),
+                        'Tuesday' => str_replace('Tuesday:', '', $detailQueryArray['result']['opening_hours']['weekday_text'][1]),
+                        'Wednesday' => str_replace('Wednesday:', '', $detailQueryArray['result']['opening_hours']['weekday_text'][2]),
+                        'Thursday' => str_replace('Thursday:', '', $detailQueryArray['result']['opening_hours']['weekday_text'][3]),
+                        'Friday' => str_replace('Friday:', '', $detailQueryArray['result']['opening_hours']['weekday_text'][4]),
+                        'Saturday' => str_replace('Saturday:', '', $detailQueryArray['result']['opening_hours']['weekday_text'][5]),
+                        'Sunday' => str_replace('Sunday:', '', $detailQueryArray['result']['opening_hours']['weekday_text'][6]),
+
+
+                    ];
                     VarDumper::dump($detailQueryArray, 5, true);
+
                 }
+                VarDumper::dump($detailQueryArray, 5, true);
+
+
+                /* $createExcel = $this->createExcelSheetService->CreateSheet($resultArray);*/
 
             }
-
-            /* https://maps.googleapis.com/maps/api/place/textsearch/json?query=Russia%20Magnitogorsk%20Home Cinema Installation&key=AIzaSyDgKrL7ZGekAAuAgW6-hi936Nxa_6LAVPM*/
-
-            /*https://maps.googleapis.com/maps/api/place/textsearch/json?query=Russia%20Magnitogorsk%20Home Cinema Installation&amp;key=AIzaSyDgKrL7ZGekAAuAgW6-hi936Nxa_6LAVPM*/
-
-
-            /* $queryStr = "https://maps.googleapis.com/maps/api/place/textsearch/json?query=" . $model->country . '%20' . $model->city . '%20' . $model->category . '&key=AIzaSyDgKrL7ZGekAAuAgW6-hi936Nxa_6LAVPM';*/
-
-            /*   $queryStr = "https://maps.googleapis.com/maps/api/place/findplacefromtext/json?fields=lawyer%2Clibrary
-    &input=Museum%20of%20Contemporary%20Art%20Australia
-    &inputtype=textquery" .*/
-
-
-            /*'&key=AIzaSyDgKrL7ZGekAAuAgW6-hi936Nxa_6LAVPM';
-
-           var_dump($queryStr);
-           $this->redirect($queryStr);*/
-
         }
         return $this->render('findCity', ['model' => $model]);
     }
