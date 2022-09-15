@@ -47,7 +47,9 @@ class ParserController extends \yii\web\Controller
     public function actionJsonPage()
     {
         $resultArray = [];
+        $indexRow = 2;
         $model = new FindCityModel();
+        $blankSheet = $this->createExcelSheetService->CreateSheet();
         if ($model->load(Yii::$app->request->post()) && $model->validate()) {
             foreach ($model->categoryList as $category) {
                 $categories = Category::find()
@@ -57,6 +59,7 @@ class ParserController extends \yii\web\Controller
             }
 
             foreach ($categoryList as $categorySearch) {
+                $indexCol = 1;
                 $queryUrl = "https://maps.googleapis.com/maps/api/place/textsearch/json?";
                 $queryArray = [
                     'query' => $model->country . ' ' . $model->city . ' ' . $categorySearch,
@@ -96,15 +99,28 @@ class ParserController extends \yii\web\Controller
 
 
                     ];
-                    VarDumper::dump($detailQueryArray, 5, true);
 
+                    foreach ($resultArray as $result ) {
+                        $sheet = $blankSheet->getActiveSheet()->setCellValueByColumnAndRow($indexCol++, $indexRow, $result);
+                    }
+                    $indexRow++;
+                    $indexCol = 1;
                 }
-                VarDumper::dump($detailQueryArray, 5, true);
+
+
 
 
                 /* $createExcel = $this->createExcelSheetService->CreateSheet($resultArray);*/
 
             }
+
+            $writer = new Xlsx($blankSheet);
+            header('Content-Type: application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
+            header('Content-Disposition: attachment; filename="' . urlencode('salary_manager.xlsx')
+                . '"');
+            ob_end_clean();
+            $writer->save('php://output');
+            exit();
         }
         return $this->render('findCity', ['model' => $model]);
     }

@@ -8,7 +8,7 @@ use PhpOffice\PhpSpreadsheet\Writer\Xlsx;
 class CreateExcelSheetService
 {
 
-    public function CreateSheet(array $resultArray) :Void
+    public function CreateSheet()
     {
         $sheetName = [
             'A1' => 'Name',
@@ -37,18 +37,15 @@ class CreateExcelSheetService
             $sheet = $spreadsheet->getActiveSheet()->getStyle($index)->getFill()->setFillType(\PhpOffice\PhpSpreadsheet\Style\Fill::FILL_SOLID)->getStartColor()->setARGB('FFFF0000');
         }
 
-        foreach ($resultArray as $dataInput) {
-            $sheet = $spreadsheet->getActiveSheet()->setCellValue([++$i, $j], $dataInput);
-        }
+        return $spreadsheet;
 
-
-        $writer = new Xlsx($spreadsheet);
+        /*$writer = new Xlsx($spreadsheet);
         header('Content-Type: application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
         header('Content-Disposition: attachment; filename="' . urlencode('salary_manager.xlsx')
             . '"');
         ob_end_clean();
         $writer->save('php://output');
-        exit();
+        exit();*/
 
     }
 }
