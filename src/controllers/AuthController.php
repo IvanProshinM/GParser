@@ -32,21 +32,22 @@ class AuthController extends \yii\web\Controller
         if ($model->load(Yii::$app->request->post()) && $model->validate()) {
             $authorization = $this->authorizationService->authorization($model);
             if (!$authorization) {
-                $session->setFlash('error', 'Ошибка авторизации');
+                $session->setFlash('error', 'Такой пользователь не найден');
+                return $this->redirect('auth/login');
             }
+            Yii::$app->user->login($authorization, 3600);
             $session->setFlash('success', 'Вы успешно авторизовались как' . ' ' . $authorization->userName);
+            Yii::$app->controller->redirect('/parser/json-page');
         }
         return $this->render('authorization', ['model' => $model]);
     }
 
 
-    public function actionCheck()
+    public function actionLogout()
     {
-        if (Yii::$app->user->isGuest) {
-            echo "гость";
-        }
-        else {
-            echo Yii::$app->user->identity->login;
-        }
+        Yii::$app->user->logout();
+        $session = Yii::$app->session;
+        $session->setFlash('success', 'Вы успешно разлогинились.');
+        return $this->redirect(['auth/login']);
     }
 }

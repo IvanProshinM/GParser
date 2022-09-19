@@ -9,8 +9,13 @@ use app\services\CreateExcelSheetService;
 use app\services\JsonParseService;
 use app\models\Country;
 use app\models\FindCityModel;
+use app\services\QueryDetailService;
+use app\services\QueryTextService;
+use app\services\SearchDetailService;
 use Yii;
 use yii\db\Query;
+use yii\filters\AccessControl;
+use yii\filters\VerbFilter;
 use yii\helpers\VarDumper;
 use PhpOffice\PhpSpreadsheet\Spreadsheet;
 use PhpOffice\PhpSpreadsheet\Writer\Xlsx;
@@ -19,6 +24,42 @@ use PhpOffice\PhpSpreadsheet\Writer\Xlsx;
 class ParserController extends \yii\web\Controller
 {
 
+
+    public function behaviors()
+    {
+
+        return [
+            'access' => [
+                'class' => AccessControl::className(),
+                'only' => ['json-page'],
+                'rules' => [
+                    [
+                        'actions' => ['json-page'],
+                        'allow' => true,
+                        'roles' => ['@'],
+                    ],
+                ],
+                'denyCallback' => function ($rule, $action) {
+                    Yii::$app->session->setFlash('error', 'Для использования требуется авторизация');
+                    Yii::$app->controller->redirect('/auth/login');
+                }
+            ],
+
+        ];
+    }
+
+
+    /**
+     * @var QueryDetailService
+     */
+
+    private $queryDetailService;
+
+    /**
+     * @var QueryTextService
+     */
+
+    private $queryTextService;
 
     /**
      * @var JsonParseService
@@ -32,21 +73,34 @@ class ParserController extends \yii\web\Controller
 
     private $createExcelSheetService;
 
+
+    /**
+     * @var SearchDetailService
+     */
+
+    private $searchDetailService;
+
+
     public function __construct($id,
         $module,
                                 JsonParseService $jsonParseService,
                                 CreateExcelSheetService $createExcelSheetService,
+                                SearchDetailService $searchDetailService,
+                                QueryTextService $queryTextService,
+                                QueryDetailService $queryDetailService,
         $config = [])
     {
         parent::__construct($id, $module, $config);
         $this->jsonParseService = $jsonParseService;
         $this->createExcelSheetService = $createExcelSheetService;
+        $this->searchDetailService = $searchDetailService;
+        $this->queryTextService = $queryTextService;
+        $this->queryDetailService = $queryDetailService;
     }
 
 
     public function actionJsonPage()
     {
-        $resultArray = [];
         $indexRow = 2;
         $model = new FindCityModel();
         $blankSheet = $this->createExcelSheetService->CreateSheet();
@@ -60,47 +114,11 @@ class ParserController extends \yii\web\Controller
 
             foreach ($categoryList as $categorySearch) {
                 $indexCol = 1;
-                $queryUrl = "https://maps.googleapis.com/maps/api/place/textsearch/json?";
-                $queryArray = [
-                    'query' => $model->country . ' ' . $model->city . ' ' . $categorySearch,
-                    'key' => 'AIzaSyDgKrL7ZGekAAuAgW6-hi936Nxa_6LAVPM'
-                ];
-                $queryUrl .= http_build_query($queryArray, '', '&',);
-                $queryJson = file_get_contents($queryUrl);
-                $queryArray = json_decode($queryJson, true);
+                $queryArray = $this->queryTextService->createQuery($model, $categorySearch);
                 foreach ($queryArray['results'] as $place) {
-
-                    $detailQueryUrl = 'https://maps.googleapis.com/maps/api/place/details/json?';
-                    $detailQueryArray = [
-                        'placeid' => $place['place_id'],
-                        'fields' => 'opening_hours,website,rating,formatted_address,international_phone_number',
-                        'key' => 'AIzaSyDgKrL7ZGekAAuAgW6-hi936Nxa_6LAVPM'
-                    ];
-                    $detailQueryUrl .= http_build_query($detailQueryArray, '', '&',);
-                    $detailQueryJson = file_get_contents($detailQueryUrl);
-                    $detailQueryArray = json_decode($detailQueryJson, true);
-                    $resultArray = [
-                        'name' => $place['name'],
-                        'category' => $categorySearch,
-                        'country' => $model->country,
-                        'city' => $model->city,
-                        'address' => $place['formatted_address'],
-                        'locationLat' => $place['geometry']['location']['lat'],
-                        'locationLng' => $place['geometry']['location']['lng'],
-                        'website' => $detailQueryArray['result']['website'],
-                        'rating' => $place['rating'],
-                        'Monday' => str_replace('Monday:', '', $detailQueryArray['result']['opening_hours']['weekday_text'][0]),
-                        'Tuesday' => str_replace('Tuesday:', '', $detailQueryArray['result']['opening_hours']['weekday_text'][1]),
-                        'Wednesday' => str_replace('Wednesday:', '', $detailQueryArray['result']['opening_hours']['weekday_text'][2]),
-                        'Thursday' => str_replace('Thursday:', '', $detailQueryArray['result']['opening_hours']['weekday_text'][3]),
-                        'Friday' => str_replace('Friday:', '', $detailQueryArray['result']['opening_hours']['weekday_text'][4]),
-                        'Saturday' => str_replace('Saturday:', '', $detailQueryArray['result']['opening_hours']['weekday_text'][5]),
-                        'Sunday' => str_replace('Sunday:', '', $detailQueryArray['result']['opening_hours']['weekday_text'][6]),
-
-
-                    ];
-
-                    foreach ($resultArray as $result ) {
+                    $detailQueryArray = $this->queryDetailService->createQuery($place);
+                    $resultArray = $this->searchDetailService->detail($place, $categorySearch, $model, $detailQueryArray);
+                    foreach ($resultArray as $result) {
                         $sheet = $blankSheet->getActiveSheet()->setCellValueByColumnAndRow($indexCol++, $indexRow, $result);
                     }
                     $indexRow++;
@@ -108,10 +126,33 @@ class ParserController extends \yii\web\Controller
                 }
 
 
+                /*if ($queryArray['next_page_token']) {
+                    $indexCol = 1;
+                    sleep(3);
+                    $tokenQueryUrl = 'https://maps.googleapis.com/maps/api/place/textsearch/json?';
+                    $tokenQueryArray = [
+                        'pagetoken' => $queryArray['next_page_token'],
+                        'key' => 'AIzaSyDgKrL7ZGekAAuAgW6-hi936Nxa_6LAVPM'
+                    ];
 
 
-                /* $createExcel = $this->createExcelSheetService->CreateSheet($resultArray);*/
+                    $tokenQueryUrl .= http_build_query($tokenQueryArray, '', '&',);
+                    $tokenQueryJson = file_get_contents($tokenQueryUrl);
+                    $queryArray = json_decode($tokenQueryJson, true);
 
+
+
+                    foreach ($queryArray['results'] as $place) {
+                        $detailQueryArray = $this->queryDetailService->createQuery($place);
+                        $resultArray = $this->searchDetailService->detail($place, $categorySearch, $model, $detailQueryArray);
+                    }
+                    foreach ($resultArray as $result) {
+                        $sheet = $blankSheet->getActiveSheet()->setCellValueByColumnAndRow($indexCol++, $indexRow, $result);
+                    }
+                    $indexRow++;
+
+
+                }*/
             }
 
             $writer = new Xlsx($blankSheet);
@@ -126,7 +167,8 @@ class ParserController extends \yii\web\Controller
     }
 
 
-    public function actionSearchCountry()
+    public
+    function actionSearchCountry()
     {
         $getParams = Yii::$app->request->get();
         $countryData = [];
@@ -140,7 +182,8 @@ class ParserController extends \yii\web\Controller
     }
 
 
-    public function actionSearchCity()
+    public
+    function actionSearchCity()
     {
         $getParams = Yii::$app->request->get();
         $cityData = [];
@@ -155,7 +198,8 @@ class ParserController extends \yii\web\Controller
     }
 
 
-    public function actionSearchCategory($q = null, $id = null)
+    public
+    function actionSearchCategory($q = null, $id = null)
     {
         \Yii::$app->response->format = \yii\web\Response::FORMAT_JSON;
         $out = ['results' => ['id' => '', 'text' => '']];
@@ -175,7 +219,8 @@ class ParserController extends \yii\web\Controller
     }
 
 
-    public function actionSpreadSheet()
+    public
+    function actionSpreadSheet()
     {
 
         $sheetName = [
