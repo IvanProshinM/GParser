@@ -126,33 +126,47 @@ class ParserController extends \yii\web\Controller
                 }
 
 
-                /*if ($queryArray['next_page_token']) {
-                    $indexCol = 1;
+                if ($queryArray['next_page_token']) {
                     sleep(3);
                     $tokenQueryUrl = 'https://maps.googleapis.com/maps/api/place/textsearch/json?';
                     $tokenQueryArray = [
                         'pagetoken' => $queryArray['next_page_token'],
                         'key' => 'AIzaSyDgKrL7ZGekAAuAgW6-hi936Nxa_6LAVPM'
                     ];
-
-
                     $tokenQueryUrl .= http_build_query($tokenQueryArray, '', '&',);
                     $tokenQueryJson = file_get_contents($tokenQueryUrl);
                     $queryArray = json_decode($tokenQueryJson, true);
-
-
-
                     foreach ($queryArray['results'] as $place) {
                         $detailQueryArray = $this->queryDetailService->createQuery($place);
                         $resultArray = $this->searchDetailService->detail($place, $categorySearch, $model, $detailQueryArray);
+                        foreach ($resultArray as $result) {
+                            $sheet = $blankSheet->getActiveSheet()->setCellValueByColumnAndRow($indexCol++, $indexRow, $result);
+                        }
+                        $indexRow++;
+                        $indexCol = 1;
                     }
-                    foreach ($resultArray as $result) {
-                        $sheet = $blankSheet->getActiveSheet()->setCellValueByColumnAndRow($indexCol++, $indexRow, $result);
+
+                }
+                if ($queryArray['next_page_token']) {
+                    sleep(3);
+                    $tokenQueryUrl = 'https://maps.googleapis.com/maps/api/place/textsearch/json?';
+                    $tokenQueryArray = [
+                        'pagetoken' => $queryArray['next_page_token'],
+                        'key' => 'AIzaSyDgKrL7ZGekAAuAgW6-hi936Nxa_6LAVPM'
+                    ];
+                    $tokenQueryUrl .= http_build_query($tokenQueryArray, '', '&',);
+                    $tokenQueryJson = file_get_contents($tokenQueryUrl);
+                    $queryArray = json_decode($tokenQueryJson, true);
+                    foreach ($queryArray['results'] as $place) {
+                        $detailQueryArray = $this->queryDetailService->createQuery($place);
+                        $resultArray = $this->searchDetailService->detail($place, $categorySearch, $model, $detailQueryArray);
+                        foreach ($resultArray as $result) {
+                            $sheet = $blankSheet->getActiveSheet()->setCellValueByColumnAndRow($indexCol++, $indexRow, $result);
+                        }
+                        $indexRow++;
+                        $indexCol = 1;
                     }
-                    $indexRow++;
-
-
-                }*/
+                }
             }
 
             $writer = new Xlsx($blankSheet);
