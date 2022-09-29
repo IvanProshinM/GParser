@@ -32,6 +32,8 @@ class InitController extends \yii\console\Controller
                 $model = new Cities();
                 $model->cityName = $city->name;
                 $model->country_id = $countryObj->id;
+                $model->longitude = $city->longitude;
+                $model->latitude = $city->latitude;
                 $model->save();
             }
         }

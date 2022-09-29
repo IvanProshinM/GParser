@@ -9,6 +9,8 @@ class Cities extends ActiveRecord
     /**
      * @property string cityName;
      * @property int country_id;
+     * @property string longitude;
+     * @property string latitude;
      */
 
     public static function tableName()
@@ -20,8 +22,8 @@ class Cities extends ActiveRecord
     {
         return [
             [['cityName',"country_id" ], "required"],
-            [['cityName'], 'string'],
-            [['country_id'], 'integer'],
+            [['cityName','longitude', 'latitude'], 'string'],
+            [['country_id', ], 'integer'],
         ];
     }
 
